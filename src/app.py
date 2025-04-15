@@ -6,13 +6,28 @@ import sys
 import os
 
 def main(url):
+    """Main function to run the scraper"""
+    # Initialize the Superbid scraper
     scraper = SuperbidScraper()
-    bids_data = scraper.get_bids(url)    
 
-    for i in range(0, len(bids_data[0:2])):
-        bid_details = scraper.get_bid_details(bids_data[i]["link"])
-        bids_data[i]["bid_details"] = bid_details
-        # print(bid_details)
+    # Get the bids data
+    bids_data, not_found = scraper.get_bids(url)
+    print(f"[INFO] Nº of found bids: {len(bids_data)} bids")
+    print(f"[INFO] Nº of not found bids: {len(not_found)} bids")
+
+    # Get the bid details
+    for bid in bids_data:
+        links_to_car_auctions = scraper.get_links_to_car_auctions(bid["link"])
+
+        for link in links_to_car_auctions:
+            car_auction_details = scraper.get_car_auction_details(link)
+            bid_details = {
+                "link_to_car_auction": link,
+                "car_auction_details": car_auction_details
+            }
+            bid["bid_details"].append(bid_details)
+
+        # print(json.dumps(bid_details, indent=2, ensure_ascii=False))
 
     file_path_to_save = os.path.join(os.pardir, "data/raw/superbid/", "bids.json")
     save_bids(bids_data, file_path_to_save)
