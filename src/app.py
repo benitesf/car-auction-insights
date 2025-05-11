@@ -1,9 +1,8 @@
 from scraping.superbid import SuperbidScraper
 
 import json
-import time
-import sys
 import os
+from datetime import datetime
 
 def main(url):
     """Main function to run the scraper"""
@@ -16,20 +15,21 @@ def main(url):
     print(f"[INFO] Nº of not found bids: {len(not_found)} bids")
 
     # Get the bid details
-    for bid in bids_data:
+    for index, bid in enumerate(bids_data[0:10]):
         links_to_car_auctions = scraper.get_links_to_car_auctions(bid["link"])
 
+        details = []
         for link in links_to_car_auctions:
             car_auction_details = scraper.get_car_auction_details(link)
-            bid_details = {
+            details.append({
                 "link_to_car_auction": link,
                 "car_auction_details": car_auction_details
-            }
-            bid["bid_details"].append(bid_details)
+            })
+        bids_data[index]["details"] = details
 
         # print(json.dumps(bid_details, indent=2, ensure_ascii=False))
 
-    file_path_to_save = os.path.join(os.pardir, "data/raw/superbid/", "bids.json")
+    file_path_to_save = os.path.join(os.pardir, "data/raw/superbid/", f"bids-{datetime.now().strftime('%Y-%m-%d')}.json")
     save_bids(bids_data, file_path_to_save)
 
     scraper.close()

@@ -110,26 +110,26 @@ class SuperbidScraper:
     def get_links_to_car_auctions(self, url):
         """Get links to car auctions from the given URL"""
         n_try = 0
-        while n_try < 5:
+        while n_try < 3:
             html_content = self.get_dynamic_content_with_scroll("https://www.superbid.com.pe" + url)
             soup = self.parse_static_content(html_content)
             
             # Get the list of links to car auctions
-            links_to_car_auctions = soup.find_all("a", class_="jss630")
+            links_to_car_auctions_elements = soup.find_all("a", class_="jss630")
             
-            if len(links_to_car_auctions) > 0:
-                print(f"[SUCCESS] Nº of links to car auctions: {len(links_to_car_auctions)}")
+            if len(links_to_car_auctions_elements) > 0:
+                print(f"[SUCCESS] Nº of links to car auctions: {len(links_to_car_auctions_elements)}")
                 break
             else:
                 print(f"[INFO] No links to car auctions found")
-                print(f"[INFO] Trying again... {n_try + 1} of 5")
+                print(f"[INFO] Trying again... {n_try + 1} of 3")
                 n_try += 1
 
-        links_to_car_auctions = []
-        for link in links_to_car_auctions:
-            links_to_car_auctions.append(link["href"])
+        links_to_car_auctions_list = []
+        for link in links_to_car_auctions_elements:
+            links_to_car_auctions_list.append(link["href"])
 
-        return links_to_car_auctions
+        return links_to_car_auctions_list
 
     def get_car_auction_details(self, url):
         """Get car auction details from the given URL"""
@@ -231,6 +231,8 @@ class SuperbidScraper:
                     for li in element.find_all('li'):
                         description.append(' '.join(li.stripped_strings))
                 elif element.name == 'h1':
+                    description.append(' '.join(element.stripped_strings))
+                elif element.name == 'span':
                     description.append(' '.join(element.stripped_strings))
         else:
             print("[ERROR] Description container not found")
